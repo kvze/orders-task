@@ -9,6 +9,8 @@ const ExternalOrder = z.object({
   id: z.string().min(1),
   customerId: z.string().min(1),
   amount: z.union([z.number(), z.string()]),
+  // В старых заказах поле с фактически оплаченной суммой может отсутствовать.
+  amountPaid: z.union([z.number(), z.string()]).optional(),
   status: z.enum(["pending", "paid", "refunded"]),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -28,6 +30,10 @@ export class OrdersService {
         id: o.id,
         customerId: o.customerId,
         amountKop: toKop(parseRub(o.amount)),
+        // Отсутствующую сумму храним как null. Явный ноль сохраняем как сумму.
+        amountPaidKop: o.amountPaid === undefined
+          ? null
+          : toKop(parseRub(o.amountPaid)),
         status: o.status,
         createdAt: parseUtc(o.createdAt),
         updatedAt: parseUtc(o.updatedAt),
