@@ -11,9 +11,19 @@ export function parseRub(raw: unknown): number {
   return value;
 }
 
-/** Рубли → копейки. Доли копейки отбрасываются: деньги клиенту не досчитываем. */
+/**
+ * Переводит рубли в целые копейки по десятичным цифрам.
+ * Так 0.29 ₽ даёт ровно 29 копеек. Доли копейки отбрасываем.
+ */
 export function toKop(rub: number): number {
-  return Math.floor(rub * 100);
+  const [decimal, exponent = "0"] = String(rub).split("e");
+  const [whole, fraction = ""] = decimal.split(".");
+  const digits = whole + fraction;
+
+  const integerLength = whole.length + Number(exponent) + 2;
+  if (integerLength <= 0) return 0;
+
+  return Number(digits.slice(0, integerLength).padEnd(integerLength, "0"));
 }
 
 /** Копейки → рубли для ответа API. */

@@ -16,6 +16,10 @@ describe("parseRub", () => {
 });
 
 describe("toKop / fromKop", () => {
+  it("сохраняет копейки при переводе дробных сумм", () => {
+    expect(toKop(0.29)).toBe(29);
+    expect(toKop(1192.6)).toBe(119260);
+  });
   it("рубли в копейки", () => {
     expect(toKop(2500)).toBe(250000);
     expect(toKop(99)).toBe(9900);
