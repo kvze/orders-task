@@ -39,19 +39,22 @@ export class OrdersRepository {
   }
 
   /** Записывает версию заказа, которую OrdersService передал после проверки свежести. */
-  async save(o: Order): Promise<void> {
-    await this.db.query(
+  async save(o: Order): Promise<boolean> {
+    const result = await this.db.query(
       `INSERT INTO orders (id, customer_id, amount_kop, amount_paid_kop, status, created_at, updated_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        ON CONFLICT (id) DO UPDATE SET
-         customer_id = excluded.customer_id,
-         amount_kop  = excluded.amount_kop,
+         customer_id     = excluded.customer_id,
+         amount_kop      = excluded.amount_kop,
          amount_paid_kop = excluded.amount_paid_kop,
-         status      = excluded.status,
-         created_at  = excluded.created_at,
-         updated_at  = excluded.updated_at`,
+         status          = excluded.status,
+         created_at      = excluded.created_at,
+         updated_at      = excluded.updated_at
+       WHERE orders.updated_at < excluded.updated_at`,
       [o.id, o.customerId, o.amountKop, o.amountPaidKop, o.status, o.createdAt, o.updatedAt],
     );
+
+    return result.rowCount === 1;
   }
 
   /** Оплаченные заказы клиента, созданные в [from, to). */

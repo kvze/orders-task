@@ -52,7 +52,8 @@ export class OrdersService {
     const incoming = this.normalize(raw);
     const current = await this.orders.get(incoming.id);
     if (current && current.updatedAt.getTime() >= incoming.updatedAt.getTime()) return "stale";
-    await this.orders.save(incoming);
+    const saved = await this.orders.save(incoming);
+    if (!saved) return "stale";
     return current ? "updated" : "created";
   }
 }
